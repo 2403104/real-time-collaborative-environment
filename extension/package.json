@@ -1,0 +1,37 @@
+{
+  "name": "sync-extension",
+  "displayName": "SyncStream Collab",
+  "version": "0.0.1",
+  "engines": { "vscode": "^1.75.0" },
+  "activationEvents": ["*"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sync.newSession",
+        "title": "Sync: New Session"
+      },
+      {
+        "command": "sync.joinSession",
+        "title": "Sync: Join Existing Session"
+      },
+      {
+        "command": "sync.leaveSession",
+        "title": "Sync: Leave Session"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "@types/ws": "^8.5.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}

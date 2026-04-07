@@ -1,0 +1,7 @@
+{
+  "name": "cpp-engine",
+  "version": "1.0.0",
+  "dependencies": {
+    "node-addon-api": "^8.7.0"
+  }
+}

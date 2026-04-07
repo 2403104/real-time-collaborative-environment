@@ -1,0 +1,34 @@
+import { ConnectedUser } from "../../session/sessionManager";
+import { getNodeByPath, createFileNode, getNodeById, ensureDirExist } from "../../db/operation";
+import { sendError, broadcastFileCreated } from "../../broadcast";
+
+export async function handleFileCreate(user: ConnectedUser, message: {path: string}) : Promise<void> {
+  const {sessionKey, workspaceId, username} = user;
+  const {path} = message;
+  if(!path) {
+    sendError(user.ws, "MISSING_PATH", "FILE_CREATE requires path.");
+    return;  
+  }
+  const existing = await getNodeByPath(workspaceId, path);
+  if(existing) {
+    sendError(user.ws, "FILE_EXISTS", `File already exists: ${path}`);
+    return;
+  }
+  const lstSlash = path.lastIndexOf("/");
+  const name = path.slice(lstSlash + 1);
+  const parentPath = lstSlash > 0 ? path.slice(0, lstSlash) : "";
+
+  const parentId = await ensureDirExist(workspaceId, parentPath);
+  if(!parentId) {
+    sendError(user.ws, "CREATE_FAILED", `Failed to resolve or create parent path: ${parentPath}`);
+    return;
+  }
+  const node = await createFileNode(workspaceId, parentId, name, path);
+  if(!node) {
+    sendError(user.ws, "CREATE_FAILED", `Failed to create file: ${path}`);
+    return;
+  }
+
+  broadcastFileCreated(sessionKey, path);
+  console.log(`[FileCreate] ${path} created in session ${sessionKey}`);
+}
