@@ -23,6 +23,6 @@ export async function handleDirDelete(user: ConnectedUser, message: {path: strin
     sendError(user.ws, "DELETE_FAILED", `Failed to delete directory: ${path} from database`);
     return;
   }
-  broadcastDirDeleted(sessionKey, path, deletedPaths);
+  broadcastDirDeleted(sessionKey, path, deletedPaths, user.userId);
   console.log(`[DirDelete] ${path} (and ${deletedPaths.length - 1} children) deleted in session ${sessionKey}`);
 }

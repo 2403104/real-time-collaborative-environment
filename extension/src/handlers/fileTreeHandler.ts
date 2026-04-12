@@ -32,7 +32,7 @@ export function registerFileTreeHandlers(context: vscode.ExtensionContext): void
       if(!relativePath || shouldIgnore(relativePath)) continue;
       const isDir = fs.statSync(file.fsPath).isDirectory();
       send({
-        type: isDir ? "DIR_CREATED" : "FILE_CREATED",
+        type: isDir ? "DIR_CREATE" : "FILE_CREATE",
         path: relativePath
       });    
       console.log(`[FileTree] ${isDir ? 'DIR' : 'FILE'}_CREATE sent: ${relativePath}`);
@@ -50,14 +50,14 @@ export function registerFileTreeHandlers(context: vscode.ExtensionContext): void
       const newParent = newPath.slice(0, newPath.lastIndexOf("/"));
       if(oldParent === newParent){
         send({
-          type: isDir ? "DIR_RENAMED" : "FILE_RENAMED",
+          type: isDir ? "DIR_RENAME" : "FILE_RENAME",
           oldPath: oldPath,
           newPath: newPath
         });
         console.log(`[FileTree] ${isDir ? 'DIR' : 'FILE'}_RENAME sent: ${oldPath} → ${newPath}`);      
       } else {
         send({
-          type: isDir ? "DIR_MOVED" : "FILE_MOVED",
+          type: isDir ? "DIR_MOVE" : "FILE_MOVE",
           oldPath: oldPath,
           newPath: newPath
         });
@@ -85,7 +85,7 @@ export function registerFileTreeHandlers(context: vscode.ExtensionContext): void
       if(!relativePath || shouldIgnore(relativePath)) continue
       const isDir = pendingDeletions.get(file.fsPath);
       send({
-        type: isDir ? "DIR_DELETED" : "FILE_DELETED",
+        type: isDir ? "DIR_DELETE" : "FILE_DELETE",
         path: relativePath
       });
       console.log(`[FileTree] ${isDir ? 'DIR' : 'FILE'}_DELETE sent: ${relativePath}`);

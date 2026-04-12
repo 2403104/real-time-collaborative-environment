@@ -18,7 +18,7 @@ export async function onDisconnect(ws: WebSocket) : Promise<void> {
     
     if(preRemoval?.fileId) {
       try {
-        engine.clearViewer(sessionKey, preRemoval.fileId, userId);
+        engine.clearViewer(sessionKey, preRemoval.fileId, username);
         if(engine.getModifyingUser(sessionKey, preRemoval.fileId) === username) {
           engine.clearModifyingUser(sessionKey, preRemoval.fileId);
         }

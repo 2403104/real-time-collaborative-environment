@@ -83,6 +83,13 @@ export async function createFileNode(workspaceId: string, parentId: string, name
 
     return node;
   } catch (err: any) {
+    // Concurrent FILE_OPEN + FILE_CREATE can both pass the initial getNodeByPath; loser hits E11000.
+    const dup =
+      err?.code === 11000 || String(err?.message ?? "").includes("E11000");
+    if (dup) {
+      const retry = await getNodeByPath(workspaceId, path);
+      if (retry && retry.type === "file") return retry;
+    }
     console.error(`[DB] createFileNode failed [${path}]:`, err.message);
     return null;
   }
@@ -170,6 +177,23 @@ export async function ensureDirExist(workspaceId: string, dirPath: string) : Pro
     console.error(`[DB] ensureDirRecursive failed to create [${dirPath}]:`, err.message);
     return null;
   }
+}
+
+/** Ensures a file node exists (handles FILE_OPEN racing ahead of FILE_CREATE). */
+export async function getOrCreateFileNodeByPath(workspaceId: string, filePath: string) {
+  const existing = await getNodeByPath(workspaceId, filePath);
+  if (existing) {
+    return existing.type === "file" ? existing : null;
+  }
+  const lstSlash = filePath.lastIndexOf("/");
+  const name = filePath.slice(lstSlash + 1);
+  const parentPath = lstSlash > 0 ? filePath.slice(0, lstSlash) : "";
+  const parentId = await ensureDirExist(workspaceId, parentPath);
+  if (!parentId) return null;
+  const created = await createFileNode(workspaceId, parentId, name, filePath);
+  if (created) return created;
+  const retry = await getNodeByPath(workspaceId, filePath);
+  return retry && retry.type === "file" ? retry : null;
 }
 
 export async function deleteDirRecursive(workspaceId: string, dirNodeId: string): Promise<string[]> {

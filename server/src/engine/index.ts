@@ -5,6 +5,11 @@ const enginePath = path.resolve(__dirname, config.engine.path);
 
 const _engine = require(enginePath);
 
+/** C++ engine throws if session/file was never opened or already torn down — safe to ignore for cleanup paths. */
+function isBenignMissingState(msg: string): boolean {
+  return /not found|session not found/i.test(String(msg ?? ""));
+}
+
 interface PieceSnapshot {
   bufferType: 0 | 1,
   start: number,
@@ -38,6 +43,7 @@ const engine = {
     try {
       _engine.closeFile(sessionKey, fileId);
     } catch (err: any) {
+      if (isBenignMissingState(err.message)) return;
       console.error(`[Engine] closeFile failed [${sessionKey}:${fileId}]:`, err.message);
       throw err;
     }
@@ -99,6 +105,7 @@ const engine = {
     try {
       return _engine.getModifyingUser(sessionKey, fileId) as string;
     } catch (err: any) {
+      if (isBenignMissingState(err.message)) return "";
       console.error(`[Engine] getModifyingUser failed [${sessionKey}:${fileId}]:`, err.message);
       throw err;
     }
@@ -108,6 +115,7 @@ const engine = {
     try {
       _engine.clearModifyingUser(sessionKey, fileId);
     } catch (err: any) {
+      if (isBenignMissingState(err.message)) return;
       console.error(`[Engine] clearModifyingUser failed [${sessionKey}:${fileId}]:`, err.message);
       throw err;
     }
@@ -121,6 +129,7 @@ const engine = {
     try {
       _engine.setViewer(sessionKey, fileId, username);
     } catch (err: any) {
+      if (isBenignMissingState(err.message)) return;
       console.error(`[Engine] setViewer failed [${sessionKey}:${fileId}]:`, err.message);
       throw err;
     }
@@ -134,6 +143,7 @@ const engine = {
     try {
       _engine.clearViewer(sessionKey, fileId, username);
     } catch (err: any) {
+      if (isBenignMissingState(err.message)) return;
       console.error(`[Engine] clearViewer failed [${sessionKey}:${fileId}]:`, err.message);
       throw err;
     }
@@ -162,6 +172,7 @@ const engine = {
     try {
       return _engine.getAllFileStates(sessionKey) as FileStatus[];
     } catch (err: any) {
+      if (isBenignMissingState(err.message)) return [];
       console.error(`[Engine] getAllFileStates failed [${sessionKey}]:`, err.message);
       throw err;
     }

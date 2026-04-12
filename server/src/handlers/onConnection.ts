@@ -135,6 +135,7 @@ export async function onConnection(ws: WebSocket, req: IncomingMessage) : Promis
       }
 
       const fileStates = engine.getAllFileStates(activeSessionKey);
+      console.log("[Sync] File states from the server sent:", JSON.stringify(fileStates));
       broadcastSessionState(activeSessionKey, fileStates);
       broadcastTotalActiveUsers(activeSessionKey);
     }

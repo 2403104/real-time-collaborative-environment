@@ -45,6 +45,7 @@ build/Debug/
 Thumbs.db
 .vscode/
 *.suo
+
 *.ntvs*
 *.njsproj
 *.sln

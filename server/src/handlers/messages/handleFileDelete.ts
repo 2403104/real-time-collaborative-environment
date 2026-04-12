@@ -31,7 +31,7 @@ export async function handleFileDelete(user: ConnectedUser, message: {path: stri
     );
     return;
   }
-  broadcastFileDeleted(sessionKey, path);
+  broadcastFileDeleted(sessionKey, path, user.userId);
   console.log(
     `[FileDelete] ${path} (ID: ${nodeId}) deleted in session ${sessionKey}`
   );  

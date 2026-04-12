@@ -69,7 +69,7 @@ export async function onMessage(user: ConnectedUser, rawData: any) :  Promise<vo
       case "FILE_CLOSE":
         await handleCloseFile(user, message);
         break;
-      case "TEXT_EDIT": // (Handling both just in case frontend sends TEXT_EDIT)
+      case "FILE_EDIT": // (Handling both just in case frontend sends TEXT_EDIT)
         await handleFileEdit(user, message);
         break;
       case "START_MODIFYING":

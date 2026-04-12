@@ -18,6 +18,10 @@
       {
         "command": "sync.leaveSession",
         "title": "Sync: Leave Session"
+      },
+      {
+        "command": "myExtension.showFileViewersDropdown",
+        "title": "Show File Viewers Dropdown"
       }
     ]
   },

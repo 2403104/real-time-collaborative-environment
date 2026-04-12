@@ -195,11 +195,17 @@ export function getUserCount(sessionKey: string): number {
 }
 
 // THIS IS NOW INSTANT O(1) LOOKUP
+// Clients send workspace-relative paths (e.g. "src/a.cpp"); pathToId is keyed by joinPathSessionKey(...)
+// from userEntersFile — resolve both forms.
 export function getFileIdByPath(sessionKey: string, filePath: string): string | null {
   const session = sessions.get(sessionKey);
   if (!session) return null;
-  
-  return session.pathToId.get(filePath) ?? null;
+
+  return (
+    session.pathToId.get(filePath) ??
+    session.pathToId.get(joinPathSessionKey(filePath, sessionKey)) ??
+    null
+  );
 }
 
 export function getUserCurrentFileBeforeRemoval(ws: WebSocket): { sessionKey: string; userId: string; fileId: string | null } | null {

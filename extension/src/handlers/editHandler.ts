@@ -31,7 +31,7 @@ export function registerEditHandlers(context: vscode.ExtensionContext): void {
       }
       send({
         type: "FILE_EDIT",
-        path: relativePath,
+        filePath: relativePath,
         offset: offset,
         length: length,
         text: text

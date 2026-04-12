@@ -62,7 +62,11 @@ function _createConnection(url: string, action: string): void {
   ws.on("message", (data) => {
     try {
       const message = JSON.parse(data.toString());
-      routeMessage(message);
+      try {
+        routeMessage(message);
+      } catch (err: any) {
+        console.error("[Sync] Failed to handle message:", message?.type, err?.message ?? err);
+      }
     } catch (err: any) {
       console.error("[Sync] Failed to parse message:", data.toString());
     }

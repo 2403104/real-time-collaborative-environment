@@ -24,7 +24,10 @@ export async function handleFileRename(user: ConnectedUser, message: {oldPath: s
     sendError(user.ws, "INVALID_OPERATION", `Path ${oldPath} is a folder. Use folder rename instead.`);
     return;
   }
-  const success = await renameFileNode(sessionKey, oldPath, newPath);
+  const nodeId = oldNode._id.toString();
+  const lstSlash = newPath.lastIndexOf("/");
+  const newName = newPath.slice(lstSlash + 1);
+  const success = await renameFileNode(nodeId, newName, newPath);
   if(!success) {
     sendError(user.ws, "RENAME_FAILED", `Failed to rename file from ${oldPath} to ${newPath} in database`);
     return;

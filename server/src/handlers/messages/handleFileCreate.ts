@@ -11,7 +11,10 @@ export async function handleFileCreate(user: ConnectedUser, message: {path: stri
   }
   const existing = await getNodeByPath(workspaceId, path);
   if(existing) {
-    sendError(user.ws, "FILE_EXISTS", `File already exists: ${path}`);
+    if(existing.type === "file") {
+      return;
+    }
+    sendError(user.ws, "FILE_EXISTS", `Path already exists: ${path}`);
     return;
   }
   const lstSlash = path.lastIndexOf("/");
@@ -23,10 +26,15 @@ export async function handleFileCreate(user: ConnectedUser, message: {path: stri
     sendError(user.ws, "CREATE_FAILED", `Failed to resolve or create parent path: ${parentPath}`);
     return;
   }
-  const node = await createFileNode(workspaceId, parentId, name, path);
+  let node = await createFileNode(workspaceId, parentId, name, path);
   if(!node) {
-    sendError(user.ws, "CREATE_FAILED", `Failed to create file: ${path}`);
-    return;
+    const again = await getNodeByPath(workspaceId, path);
+    if(again && again.type === "file") {
+      node = again;
+    } else {
+      sendError(user.ws, "CREATE_FAILED", `Failed to create file: ${path}`);
+      return;
+    }
   }
 
   broadcastFileCreated(sessionKey, path);

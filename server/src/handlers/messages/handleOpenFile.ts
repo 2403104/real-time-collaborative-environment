@@ -1,30 +1,31 @@
 import { ConnectedUser, userEntersFile, joinPathSessionKey } from "../../session/sessionManager";
-import { getNodeByPath, loadFileContent } from "../../db/operation";
+import { getOrCreateFileNodeByPath, loadFileContent } from "../../db/operation";
 
 import { sendFileSync, sendError, broadcastSessionState } from "../../broadcast";
 import engine from "../../engine/index";
 
-export async function handleOpenFile(user: ConnectedUser, message: {path: string}) : Promise<void> {
+export async function handleOpenFile(user: ConnectedUser, message: {filePath: string}) : Promise<void> {
   const {sessionKey, workspaceId, username} = user;
-  const {path} = message;
-  if(!path) {
+  const {filePath} = message;
+  if(!filePath) {
     sendError(user.ws, "MISSING_PATH", "FILE_OPEN requires path.");
     return;  
   }
-  const node = await getNodeByPath(workspaceId, path);
+  const node = await getOrCreateFileNodeByPath(workspaceId, filePath);
   if(!node) {
-    sendError(user.ws, "FILE_NOT_FOUND", `File not found: ${path}`);
+    sendError(user.ws, "FILE_NOT_FOUND", `File not found: ${filePath}`);
     return;
   }
 
   if(node.type != "file") {
-    sendError(user.ws, "NOT_A_FILE", `Path is not a file: ${path}`);
+    sendError(user.ws, "NOT_A_FILE", `Path is not a file: ${filePath}`);
     return;
   }
   
   const fileId = node._id.toString();
-  const filePath = joinPathSessionKey(path, sessionKey);
-  userEntersFile(sessionKey, user.userId, fileId, filePath);
+  const content = await loadFileContent(fileId);
+  engine.openFile(sessionKey, fileId, joinPathSessionKey(filePath, sessionKey), content);
+  userEntersFile(sessionKey, user.userId, fileId, joinPathSessionKey(filePath, sessionKey));
   try {
     engine.setViewer(sessionKey, fileId, username);
   } catch (err: any) {
@@ -37,6 +38,6 @@ export async function handleOpenFile(user: ConnectedUser, message: {path: string
     broadcastSessionState(sessionKey, []);
   }
   console.log(
-    `[OpenFile] ${username} viewing ${path} in session ${sessionKey}`
+    `[OpenFile] ${username} viewing ${filePath} in session ${sessionKey}`
   );
 }

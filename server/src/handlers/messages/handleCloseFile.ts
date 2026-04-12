@@ -3,21 +3,20 @@ import { sendError, broadcastSessionState } from "../../broadcast";
 import { getNodeByPath } from "../../db/operation";
 import engine from "../../engine";
 
-export async function handleCloseFile(user: ConnectedUser, message: {path: string}) : Promise<void> {
+export async function handleCloseFile(user: ConnectedUser, message: {filePath: string}) : Promise<void> {
   const {sessionKey, workspaceId, username} = user;
-  const {path} = message;
-  if(!path) {
+  const {filePath} = message;
+  if(!filePath) {
     sendError(user.ws, "MISSING_PATH", "FILE_CLOSE requires path.");
     return;  
   }
-  const node = await getNodeByPath(workspaceId, path);
+  const node = await getNodeByPath(workspaceId, filePath);
   if(!node) {
-    sendError(user.ws, "FILE_NOT_FOUND", `File not found: ${path}`);
     return;
   }
   const fileId = node._id.toString();
   try {
-    engine.clearViewer(sessionKey, fileId, user.userId);
+    engine.clearViewer(sessionKey, fileId, username);
     if(engine.getModifyingUser(sessionKey, fileId) === username) {
       engine.clearModifyingUser(sessionKey, fileId);
     }
@@ -40,6 +39,6 @@ export async function handleCloseFile(user: ConnectedUser, message: {path: strin
     
   }
   console.log(
-    `[CloseFile] ${username} closed ${path} in session ${sessionKey}`
+    `[CloseFile] ${username} closed ${filePath} in session ${sessionKey}`
   );
 }

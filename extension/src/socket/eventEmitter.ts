@@ -4,6 +4,7 @@ import { writeSyncJsonFile } from "../extension";
 import { handleIncomingFileEdit } from "../handlers/editHandler";
 import { handleIncomingDirCreated, handleIncomingDirMoved, handleIncomingDirRename, handleIncomingFileCreated, handleIncomingFileDeleted, handleIncomingFileMoved, handleIncomingFileRenamed, hanldeIncomingDirDelete } from "../handlers/fileTreeHandler";
 import { showError, showMessage } from "../ui/notifications";
+import { updateFilePresence, updateTotalUserCount } from "../ui/statusManager";
 import { setSession } from "../utils/session";
 
 export function routeMessage(message : any): void {
@@ -40,7 +41,13 @@ export function routeMessage(message : any): void {
       break;
 
     case "SESSION_STATE":
-      // TODO: import and call statusBar update
+      console.log("[Sync] SESSION_STATE received:", JSON.stringify(message));
+      console.log("[Sync] SESSION_STATE received:", JSON.stringify(message));
+      updateFilePresence(message.files ?? []);
+      break;
+
+    case "TOTAL_ACTIVE_USERS":
+      updateTotalUserCount(message.total ?? 0);
       break;
 
     // File Tree changes
@@ -67,7 +74,6 @@ export function routeMessage(message : any): void {
       break;
     case "DIR_MOVED":
       handleIncomingDirMoved(message.oldPath, message.newPath);
-      break;
       break;
     case "ERROR":
       const errorMsg = message.message || "Unknown server error";

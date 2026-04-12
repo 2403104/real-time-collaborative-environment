@@ -9,6 +9,8 @@ import { register } from "module";
 import { registerFileTreeHandlers } from "./handlers/fileTreeHandler";
 import { authHandler } from "./handlers/authHandler";
 import { registerEditHandlers } from "./handlers/editHandler";
+import { registerStatusHandler } from "./handlers/dropDownHandler";
+import { registerFileTracker } from "./handlers/fileTracker";
 
 const SYNC_FILE = ".sync.json"
 const GITIGNORE = ".gitignore";
@@ -87,7 +89,9 @@ export function activate(context: vscode.ExtensionContext): void {
   initSession();
   authHandler(context);
   registerFileTreeHandlers(context);
+  registerFileTracker(context);
   registerEditHandlers(context);
+  registerStatusHandler(context);
 }
 
 export function deactivate(): void {}

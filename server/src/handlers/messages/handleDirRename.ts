@@ -32,6 +32,6 @@ export async function handleDirRename(user: ConnectedUser, message: {oldPath: st
     sendError(user.ws, "RENAME_FAILED", `Failed to rename directory from ${oldPath} to ${newPath} in database`);
     return;
   }
-  broadcastDirRenamed(sessionKey, newPath, nodeId);
+  broadcastDirRenamed(sessionKey, oldPath, newPath);
   console.log(`[DirRename] ${oldPath} -> ${newPath}`);
 }

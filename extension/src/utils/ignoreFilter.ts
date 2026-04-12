@@ -13,6 +13,10 @@ const IGNORED = [
   ".env.local",
   ".DS_Store",
   "Thumbs.db",
+  ".gitignore",
+  ".vscodeignore",
+  ".sync.json",
+  ".vscode",
 ];
 
 export function shouldIgnore(relativePath: string) : boolean {

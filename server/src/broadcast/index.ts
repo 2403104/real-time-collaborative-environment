@@ -172,7 +172,6 @@ export function broadcastSessionState(
     modifyingBy: string | null
   }[],
 ) {
-
   const files: FileStatusPayload[] = fileStates.map((fs) => {
     const prefix = sessionKey + ":";
     const path = fs.filePath?.startsWith(prefix) 
@@ -180,11 +179,11 @@ export function broadcastSessionState(
         : fs.filePath ?? null;
     return {
       filePath: path ?? "",
-      viewers: fs.viewers,
+      viewers: Array.isArray(fs.viewers) ? fs.viewers : [],
       isModifying: fs.isModifying,
       modifyingBy: fs.modifyingBy,
     }
-  });
+  }).filter((f) => f.filePath.trim() !== "");
   const message: SessionStateMessage = {
     type: "SESSION_STATE",
     files,
@@ -202,13 +201,14 @@ export function broadcastFileCreated(sessionKey: string, path: string): void {
 
 export function broadcastFileDeleted(
   sessionKey: string,
-  path:       string
+  path:       string,
+  excludeUserId?: string
 ): void {
   const message: FileDeletedMessage = {
     type: "FILE_DELETED",
     path,
   };
-  broadcastToSession(sessionKey, message);
+  broadcastToSession(sessionKey, message, excludeUserId);
 }
 
 export function broadcastFileRenamed(
@@ -253,14 +253,15 @@ export function broadcastDirCreated(
 export function broadcastDirDeleted(
   sessionKey:   string,
   path:         string,
-  deletedPaths: string[]
+  deletedPaths: string[],
+  excludeUserId?: string
 ): void {
   const message: DirDeletedMessage = {
     type: "DIR_DELETED",
     path,
     deletedPaths,
   };
-  broadcastToSession(sessionKey, message);
+  broadcastToSession(sessionKey, message, excludeUserId);
 }
 
 export function broadcastDirRenamed(

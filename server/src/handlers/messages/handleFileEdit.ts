@@ -28,6 +28,8 @@ export async function handleFileEdit(
     return;
   }
 
+  console.log(`length: ${length} \n filePath: ${filePath}\n offset: ${offset}\n text: ${text}`);
+
   try {
     if (length === 0) {
       engine.insert(sessionKey, fileId, offset, text);
@@ -42,5 +44,5 @@ export async function handleFileEdit(
     return;
   }
 
-  broadcastFileEdit(sessionKey, filePath, offset, length, text, userId, username);
+  broadcastFileEdit(sessionKey, fileId, offset, length, text, userId, username);
 }
