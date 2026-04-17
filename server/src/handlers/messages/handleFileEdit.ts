@@ -1,6 +1,11 @@
 import { ConnectedUser, getFileIdByPath } from "../../session/sessionManager";
 import { broadcastFileEdit, sendError } from "../../broadcast";
 import engine from "../../engine";
+import { handleStartModifying } from "./handleStartModifying";
+import { handleStopModifying } from "./handleStopModifying";
+
+const modifyingCooldowns = new Map<string, ReturnType<typeof setTimeout>>();
+const MODIFYING_TIMEOUT = 3000; // ms
 
 export async function handleFileEdit(
   user: ConnectedUser, 
@@ -17,6 +22,13 @@ export async function handleFileEdit(
   ) {
     sendError(user.ws, "MISSING_FIELDS", "FILE_EDIT requires filePath.");
     return;
+  }
+
+  const cooldownKey = `${sessionKey}:${userId}:${filePath}`;
+  const isAlreadyModifying = modifyingCooldowns.has(cooldownKey);
+
+  if (!isAlreadyModifying) {
+    handleStartModifying(user, { filePath });
   }
   
   if (length === 0 && text === "") return;
@@ -45,4 +57,12 @@ export async function handleFileEdit(
   }
 
   broadcastFileEdit(sessionKey, fileId, offset, length, text, userId, username);
+  clearTimeout(modifyingCooldowns.get(cooldownKey));
+  modifyingCooldowns.set(
+    cooldownKey,
+    setTimeout(() => {
+      modifyingCooldowns.delete(cooldownKey);
+      handleStopModifying(user, { filePath: filePath });
+    }, MODIFYING_TIMEOUT)
+  )
 }

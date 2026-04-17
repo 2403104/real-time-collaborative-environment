@@ -17,6 +17,8 @@ import { handleDirRename } from "./messages/handleDirRename";
 import { handleStartModifying } from "./messages/handleStartModifying";
 import { handleStopModifying } from "./messages/handleStopModifying";
 
+import engine from "../engine";
+
 export async function onMessage(user: ConnectedUser, rawData: any) :  Promise<void> {
   let message;
   try {
@@ -33,6 +35,8 @@ export async function onMessage(user: ConnectedUser, rawData: any) :  Promise<vo
     return;
   }
   try {
+    const fileStates = engine.getAllFileStates(user.sessionKey);
+    console.log("[Sync Debug] Current File states from the server sent:", JSON.stringify(fileStates));
     switch(message.type){
       // File Operations
       case "FILE_CREATE":
@@ -72,12 +76,13 @@ export async function onMessage(user: ConnectedUser, rawData: any) :  Promise<vo
       case "FILE_EDIT": // (Handling both just in case frontend sends TEXT_EDIT)
         await handleFileEdit(user, message);
         break;
-      case "START_MODIFYING":
-        await handleStartModifying(user, message);
-        break;
-      case "STOP_MODIFYING":
-        await handleStopModifying(user, message);
-        break;
+        
+      // case "START_MODIFYING":
+      //   await handleStartModifying(user, message);
+      //   break;
+      // case "STOP_MODIFYING":
+      //   await handleStopModifying(user, message);
+      //   break;
 
       // Unknown Operations
       default:

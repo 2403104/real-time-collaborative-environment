@@ -24,8 +24,8 @@ export async function handleOpenFile(user: ConnectedUser, message: {filePath: st
   
   const fileId = node._id.toString();
   const content = await loadFileContent(fileId);
-  engine.openFile(sessionKey, fileId, joinPathSessionKey(filePath, sessionKey), content);
-  userEntersFile(sessionKey, user.userId, fileId, joinPathSessionKey(filePath, sessionKey));
+  engine.openFile(sessionKey, fileId, filePath, content);
+  userEntersFile(sessionKey, user.userId, fileId, filePath);
   try {
     engine.setViewer(sessionKey, fileId, username);
   } catch (err: any) {

@@ -8,6 +8,7 @@ namespace CppEngine {
     return instance;
   }
 
+  // dead code currently
   std::string DocumentManager::makeKey(
     const std::string& sessionKey,
     const std::string& fileId
@@ -35,7 +36,7 @@ namespace CppEngine {
     const std::string& fileId
   ) const {
     auto sessionIt = _documents.find(sessionKey);
-    if(sessionIt == _documents.end()) {
+    if(sessionIt == _documents.end()) {   
       throw std::runtime_error("DocumentManager::getState - session not found: " + sessionKey);    
     }
     auto fileIt = sessionIt->second.find(fileId);
@@ -48,7 +49,7 @@ namespace CppEngine {
   void DocumentManager::openFile(
     const std::string& sessionKey,
     const std::string& fileId,
-    const std::string& filepath,
+    const std::string& filePath,
     const std::string& content
   ) {
     auto& session = _documents[sessionKey];
@@ -59,7 +60,7 @@ namespace CppEngine {
       fileId,
       DocumentState {
         std::make_unique<PieceTable>(content),
-        filepath,
+        filePath,
         {},
         false,
         ""
@@ -186,7 +187,7 @@ namespace CppEngine {
 
     for(const auto& [fileId, state] : sessionIt->second) {
       res.push_back({
-        state.filepath,
+        state.filePath,
         state.activeViewers,
         state.isModifying,
         state.modifyingBy
