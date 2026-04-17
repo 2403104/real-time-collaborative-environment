@@ -141,7 +141,7 @@ namespace CppEngine {
     const std::string& fileId,
     const std::string& username
   ) {
-    getState(sessionKey, fileId).activeViewers.insert(username);
+    getState(sessionKey, fileId).viewers.insert(username);
   }
 
   void DocumentManager::clearViewer(
@@ -149,7 +149,7 @@ namespace CppEngine {
     const std::string& fileId,
     const std::string& username
   ) {
-    getState(sessionKey, fileId).activeViewers.erase(username);
+    getState(sessionKey, fileId).viewers.erase(username);
   }
 
 
@@ -188,7 +188,7 @@ namespace CppEngine {
     for(const auto& [fileId, state] : sessionIt->second) {
       res.push_back({
         state.filePath,
-        state.activeViewers,
+        state.viewers,
         state.isModifying,
         state.modifyingBy
       });

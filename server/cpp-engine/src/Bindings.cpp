@@ -378,9 +378,9 @@ namespace CppEngine {
         );
 
         // Convert the C++ unordered_set into a JS Array
-        Napi::Array viewersArray = Napi::Array::New(env, s.activeViewers.size());
+        Napi::Array viewersArray = Napi::Array::New(env, s.viewers.size());
         uint32_t vIndex = 0;
-        for (const std::string& viewer : s.activeViewers) {
+        for (const std::string& viewer : s.viewers) {
           viewersArray.Set(vIndex++, Napi::String::New(env, viewer));
         }
         jsObject.Set("viewers", viewersArray);

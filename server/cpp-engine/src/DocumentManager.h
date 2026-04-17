@@ -16,7 +16,7 @@ namespace CppEngine {
   struct DocumentState {
     std::unique_ptr<PieceTable> pieceTable;  // the text engine for this file
     std::string filePath;   // stored as "SESSION_KEY:src/foo/bar.ts"
-    std::unordered_set<std::string> activeViewers; // will keep track who are watching that file
+    std::unordered_set<std::string> viewers; // will keep track who are watching that file
     bool isModifying;   // true if a user is actively typing
     std::string modifyingBy; // username of who is typing, "" if nobody
 
@@ -28,7 +28,7 @@ namespace CppEngine {
   // LightWight struct to broadcast all the active users
   struct FileStatus {
     std::string filePath;
-    std::unordered_set<std::string> activeViewers;
+    std::unordered_set<std::string> viewers;
     bool isModifying;
     std::string modifyingBy;  
   };
