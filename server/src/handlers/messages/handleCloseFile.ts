@@ -2,6 +2,7 @@ import { ConnectedUser, userLeavesFile, getFileViewers } from "../../session/ses
 import { sendError, broadcastSessionState } from "../../broadcast";
 import { getNodeByPath } from "../../db/operation";
 import engine from "../../engine";
+import { unregisterFileInDirtyTracker } from "../../timers/dirtyTracker";
 
 export async function handleCloseFile(user: ConnectedUser, message: {filePath: string}) : Promise<void> {
   const {sessionKey, workspaceId, username} = user;
@@ -28,6 +29,7 @@ export async function handleCloseFile(user: ConnectedUser, message: {filePath: s
   const remainViewers = getFileViewers(sessionKey, fileId);
   if(remainViewers.length === 0) {
     try {
+      unregisterFileInDirtyTracker(sessionKey, fileId);
       engine.closeFile(sessionKey, fileId);
     } catch (err: any) {
       // Already closed

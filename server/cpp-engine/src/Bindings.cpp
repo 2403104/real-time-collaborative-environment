@@ -398,6 +398,28 @@ namespace CppEngine {
     return env.Undefined();
   }
 
+Napi::Value IsFileOpen(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  
+  if(info.Length() < 2) {
+    Napi::TypeError::New(env, "isFileOpen requires 2 arguments")
+      .ThrowAsJavaScriptException();
+    return env.Null();    
+  }
+
+  std::string sessionKey = info[0].As<Napi::String>().Utf8Value();
+  std::string fileId = info[1].As<Napi::String>().Utf8Value();
+
+  try {
+    bool result = DocumentManager::getInstance().isFileOpen(sessionKey, fileId);
+    return Napi::Boolean::New(env, result);
+  }
+  catch(const std::exception& e) {
+    Napi::Error::New(env, e.what()).ThrowAsJavaScriptException();
+    return env.Null();
+  }
+}
+
   Napi::Value RestoreFile(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 
@@ -453,6 +475,7 @@ namespace CppEngine {
     exports.Set("getPieces",          Napi::Function::New(env, GetPieces));
     exports.Set("getAllFileStates",   Napi::Function::New(env, GetAllFileStates));
     exports.Set("restoreFile",        Napi::Function::New(env, RestoreFile));
+    exports.Set("isFileOpen",        Napi::Function::New(env, IsFileOpen));
     return exports;
   }
 

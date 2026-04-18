@@ -178,6 +178,16 @@ const engine = {
     }
   },
 
+  isFileOpen(sessionKey: string, fileId: string): boolean {
+    try {
+      return _engine.isFileOpen(sessionKey, fileId) as boolean;
+    } catch (err: any) {
+      if (isBenignMissingState(err.message)) return false;
+      console.log(`[Engine] isFileOpen failed [${sessionKey}:${fileId}]:`, err.message);
+      throw err;
+    }
+  },
+
 
   restoreFile(
     sessionKey: string,

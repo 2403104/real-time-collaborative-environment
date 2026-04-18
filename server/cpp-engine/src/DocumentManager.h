@@ -56,6 +56,12 @@ namespace CppEngine {
       const std::string& content
     );
 
+    /// @brief Will check if the file is already open
+    bool isFileOpen(
+      const std::string& sessionKey,
+      const std::string& fileId
+    );
+
     /// @brief Close a file and free its PieceTable memory.
     /// @param sessionKey  the permanent session identifier
     /// @param fileId      short generated ID for this file

@@ -46,6 +46,18 @@ namespace CppEngine {
     return fileIt->second;
   }
 
+  bool DocumentManager::isFileOpen(
+    const std::string& sessionKey,
+    const std::string& fileId
+  ) {
+    auto sessionIt = _documents.find(sessionKey);
+    if(sessionIt == _documents.end()) {
+      return false;
+    }
+    auto fileIt = sessionIt->second.find(fileId);
+    return fileIt != sessionIt->second.end();
+  }
+
   void DocumentManager::openFile(
     const std::string& sessionKey,
     const std::string& fileId,

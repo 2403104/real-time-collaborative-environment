@@ -3,6 +3,7 @@ import { broadcastFileEdit, sendError } from "../../broadcast";
 import engine from "../../engine";
 import { handleStartModifying } from "./handleStartModifying";
 import { handleStopModifying } from "./handleStopModifying";
+import { markDirty } from "../../timers/dirtyTracker";
 
 const modifyingCooldowns = new Map<string, ReturnType<typeof setTimeout>>();
 const MODIFYING_TIMEOUT = 3000; // ms
@@ -41,7 +42,6 @@ export async function handleFileEdit(
   }
 
   console.log(`length: ${length} \n filePath: ${filePath}\n offset: ${offset}\n text: ${text}`);
-
   try {
     if (length === 0) {
       engine.insert(sessionKey, fileId, offset, text);
@@ -55,6 +55,7 @@ export async function handleFileEdit(
     sendError(user.ws, "ENGINE_ERROR", err.message);
     return;
   }
+  markDirty(sessionKey, fileId);
 
   broadcastFileEdit(sessionKey, fileId, offset, length, text, userId, username);
   clearTimeout(modifyingCooldowns.get(cooldownKey));

@@ -183,7 +183,8 @@ namespace CppEngine {
       }
       y -> left = x;
       x -> parent = y;
-      y -> leftLen = subtreeLen(y -> left, _nil);
+      // y -> leftLen = subtreeLen(y -> left, _nil);
+      y -> leftLen = x -> leftLen + x -> piece.length + y -> leftLen;
     }
 
     void PieceTable::rotateRight(PieceNode* x) {
@@ -200,7 +201,8 @@ namespace CppEngine {
       }
       y -> right = x;
       x -> parent = y;
-      y -> leftLen = subtreeLen(y -> left, _nil);
+      // x -> leftLen = subtreeLen(y -> left, _nil);
+      x -> leftLen = x -> leftLen - y -> leftLen - y -> piece.length;
     }
 
     void PieceTable::fixInsert(PieceNode* z) {
