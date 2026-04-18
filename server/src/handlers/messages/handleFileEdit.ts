@@ -13,7 +13,7 @@ export async function handleFileEdit(
   message: { filePath: string; offset: number; length: number; text: string }
 ): Promise<void> {
   const { sessionKey, username, userId } = user;
-  const { filePath, offset, length, text } = message;
+  let { filePath, offset, length, text } = message;
 
   if (
     !filePath ||
@@ -24,6 +24,8 @@ export async function handleFileEdit(
     sendError(user.ws, "MISSING_FIELDS", "FILE_EDIT requires filePath.");
     return;
   }
+
+  filePath = filePath.replace(/\\/g, "/");
 
   const cooldownKey = `${sessionKey}:${userId}:${filePath}`;
   const isAlreadyModifying = modifyingCooldowns.has(cooldownKey);

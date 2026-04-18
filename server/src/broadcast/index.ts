@@ -140,8 +140,9 @@ export function broadcastFileEdit(
   senderUserId:  string,
   senderUsername: string
 ): void {
-  const filePath = getFilePath(sessionKey, fileId);
+  let filePath = getFilePath(sessionKey, fileId);
   if(!filePath) return;
+  filePath = filePath.replace(/\\/g, "/");
   const message: FileEditMessage = {
     type: "FILE_EDIT",
     filePath: filePath,
