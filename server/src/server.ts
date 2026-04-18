@@ -8,7 +8,7 @@ import { onMessage } from "./handlers/onMessage"
 
 import { getUserFromWs } from "./session/sessionManager"
 import { connectMongo } from "./db/mongo"
-import { connectRedis } from "./db/redis"
+// import { connectRedis } from "./db/redis"
 
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -51,7 +51,10 @@ wss.on("connection", async (ws: WebSocket, req: http.IncomingMessage) => {
 async function bootstrap(): Promise<void>  {
   await connectMongo();
   // await connectRedis();
-  server.listen(PORT, () => {
+  // server.listen(PORT, () => {
+  //   console.log(`[Server] Listening on port ${PORT}`);
+  // });
+  server.listen({ port: Number(PORT), host: '0.0.0.0' }, () => {
     console.log(`[Server] Listening on port ${PORT}`);
   });
   const shutdown = async (signal : string) => {

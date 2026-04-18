@@ -1,8 +1,14 @@
 {
   "name": "sync-extension",
   "displayName": "SyncStream Collab",
+  "description": "Real-time collaborative editing extension",
+  "publisher": "ankit",
   "version": "0.0.1",
-  "engines": { "vscode": "^1.75.0" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ankit/sync-extension"
+  },
+  "engines": { "vscode": "^1.85.0" },
   "activationEvents": ["*"],
   "main": "./out/extension.js",
   "contributes": {

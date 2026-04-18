@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { publisher } from "../db/redis";
+// import { publisher } from "../db/redis";
 import { getSessionUsers, getFileViewers, ConnectedUser, getFilePath } from "../session/sessionManager";
 
 export type OutgoingMessage =

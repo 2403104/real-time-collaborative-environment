@@ -14,6 +14,14 @@ function normalizePath(p: string): string {
   return p.replace(/\\/g, "/");
 }
 
+function parseUsername(rawString: string) : {display : string; machineId: string} {
+  const match = rawString.match(/^(.+?)\(@([^)]+)\)$/);
+  if(match) {
+    return {display: match[1], machineId: match[2]};  
+  }
+  return {display: rawString, machineId: rawString};
+}
+
 function getWorkspaceRoot(): string | null {
   if (!vscode.workspace.workspaceFolders?.length) return null;
   return normalizePath(vscode.workspace.workspaceFolders[0].uri.fsPath);
@@ -133,13 +141,16 @@ export function refreshFileViewerBar(editor: vscode.TextEditor | undefined) {
   }
 
   const displayText = orderedUsers
-    .map((u) => `${u.isEditor ? "$(edit)" : "$(eye)"} ${u.name}`)
-    .join("  |  ");
+  .map((u) => {
+    const { display } = parseUsername(u.name);
+    return `${u.isEditor ? "$(edit)" : "$(eye)"} ${display}`;
+  })
+  .join("  |  ");
 
   fileViewerBar.text = displayText;
   fileViewerBar.backgroundColor = presence.editor
-    ? new vscode.ThemeColor("statusBarItem.warningBackground")
-    : undefined;
+    ? new vscode.ThemeColor("statusBarItem.warningBackground")   // yellow
+    : new vscode.ThemeColor("statusBarItem.remoteBackground");   // blue
   fileViewerBar.show();
 }
 
@@ -157,14 +168,28 @@ export async function showFileViewersDropdown() {
   const orderedUsers = getOrderedUsers(presence);
   if (orderedUsers.length === 0) return;
 
-  const quickPickItems: vscode.QuickPickItem[] = orderedUsers.map((user) => ({
-    label: `${user.isEditor ? "$(edit)" : "$(eye)"} ${user.name}`,
-    description: user.isEditor ? "Currently modifying the file." : "Viewing",
-  }));
-
-  await vscode.window.showQuickPick(quickPickItems, {
-    placeHolder: `Users in ${relativePath}`,
+  const quickPickItems = orderedUsers.map((user) => {
+    const { display, machineId } = parseUsername(user.name);
+    return {
+      label: `${user.isEditor ? "$(edit)" : "$(eye)"} ${display}`,
+      description: user.isEditor ? "currently editing" : "viewing",
+      detail: `$(key) Machine ID: ${machineId}`, 
+      machineId,
+      display,
+    };
   });
+
+  const selected = await vscode.window.showQuickPick(quickPickItems, {
+    placeHolder: `Users in ${relativePath}`,
+    matchOnDetail: true,
+  });
+
+  if (selected) {
+    await vscode.env.clipboard.writeText(selected.machineId);
+    vscode.window.showInformationMessage(
+      `Machine ID for ${selected.display} copied to clipboard!`
+    );
+  }
 }
 
 // import * as vscode from "vscode";
