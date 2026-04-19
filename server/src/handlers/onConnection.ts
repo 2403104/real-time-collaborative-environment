@@ -112,7 +112,7 @@ export async function onConnection(ws: WebSocket, req: IncomingMessage) : Promis
       machineId,
       sessionKey: activeSessionKey, 
       workspaceId,
-    }    
+    }
 
     addUser(connectedUser);
     await addActiveUser(workspaceId, userId);
@@ -130,6 +130,8 @@ export async function onConnection(ws: WebSocket, req: IncomingMessage) : Promis
           type: "FILE_TREE",
           fileTree: fileTree
         }));
+        // console.log(`[New User] : Username : ${username}`);
+        // console.log(`[Server] FileTree send from server:`, JSON.stringify(fileTree, null, 2));
       } else {
         // Will handle by checking the hash
       }

@@ -5,6 +5,7 @@ import { sendError, broadcastFileCreated } from "../../broadcast";
 export async function handleFileCreate(user: ConnectedUser, message: {path: string}) : Promise<void> {
   const {sessionKey, workspaceId, username} = user;
   const {path} = message;
+  console.log(`[Path Debug] Path to be created: ${path}`);
   if(!path) {
     sendError(user.ws, "MISSING_PATH", "FILE_CREATE requires path.");
     return;  
@@ -26,6 +27,7 @@ export async function handleFileCreate(user: ConnectedUser, message: {path: stri
     sendError(user.ws, "CREATE_FAILED", `Failed to resolve or create parent path: ${parentPath}`);
     return;
   }
+  // Node content id is the _id of its content
   let node = await createFileNode(workspaceId, parentId, name, path);
   if(!node) {
     const again = await getNodeByPath(workspaceId, path);

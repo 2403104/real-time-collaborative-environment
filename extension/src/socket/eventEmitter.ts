@@ -2,6 +2,7 @@
 
 import { writeSyncJsonFile } from "../extension";
 import { handleIncomingFileEdit } from "../handlers/editHandler";
+import { handleFileTree } from "../handlers/fileTracker";
 import { handleIncomingDirCreated, handleIncomingDirMoved, handleIncomingDirRename, handleIncomingFileCreated, handleIncomingFileDeleted, handleIncomingFileMoved, handleIncomingFileRenamed, hanldeIncomingDirDelete } from "../handlers/fileTreeHandler";
 import { showError, showMessage } from "../ui/notifications";
 import { updateFilePresence, updateTotalUserCount } from "../ui/statusManager";
@@ -48,6 +49,17 @@ export function routeMessage(message : any): void {
 
     case "TOTAL_ACTIVE_USERS":
       updateTotalUserCount(message.total ?? 0);
+      break;
+
+    case "FILE_TREE":
+      if(message.fileTree  && Array.isArray(message.fileTree)) {
+        // console.log(`[Sync] Received FILE_TREE [${message.fileTree.length}`);
+        handleFileTree(message.fileTree).catch((err) => {
+          console.error("[Sync] Error handling file tree:", err);
+        });
+      } else {
+        console.warn("[Sync] Received FILE_TREE but payload was invalid.");
+      }
       break;
 
     // File Tree changes

@@ -110,7 +110,7 @@ export async function handleIncomingFileEdit(message: {
           const count = expectedRemoteEdits.get(signature) || 0;
           if(count > 1) expectedRemoteEdits.set(signature, count - 1);
           else expectedRemoteEdits.delete(signature);          
-        }, 1000);
+        }, 2500);
       }
     }
   });

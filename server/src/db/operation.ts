@@ -29,15 +29,15 @@ export async function saveFileContent(nodeId: string, content: string): Promise<
   }
 }
 
-export async function loadFileContent(nodeId: string): Promise<string> {
+export async function loadFileContent(contentId: string): Promise<string> {
   try {
-    const doc = await FileContent.findOne({ nodeId }).select("content").lean();
+    const doc = await FileContent.findOne({ _id: contentId }).select("content").lean();
     return doc?.content ?? "";
   } catch (err: any) {
-    console.error(`[DB] loadFileContent failed [${nodeId}]:`, err.message);
+    console.error(`[DB] loadFileContent failed [${contentId}]:`, err.message);
     return "";
   }
-}
+} 
 
 export async function getNodeByPath(workspaceId: string, path: string) {
   try {
@@ -360,11 +360,17 @@ export async function getFileTree(workspaceId: string) {
       .lean();
 
     return await Promise.all(
-      nodes.map(async (node) => ({
-        type: node.type,
-        path: node.path,
-        content: node.type === "folder" ? null : await getFileContent(node.contentId.toString())
-      }))
+      nodes.map(async (node) => {
+        let fileContent = null;
+        if(node.type === "file" && node.contentId) {
+          fileContent = await loadFileContent(node.contentId.toString());
+        }
+        return {
+          type: node.type,
+          path: node.path,
+          content: fileContent
+        };
+      })
     );
   } catch (err: any) {
     console.error(`[DB] getFileTree failed [${workspaceId}]:`, err.message);

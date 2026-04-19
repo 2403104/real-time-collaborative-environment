@@ -5,6 +5,7 @@ import { shouldIgnore } from "../utils/ignoreFilter";
 import * as fs from "fs";
 import { notifyFileDeleted } from "../ui/notifications";
 import { resolveAbsolutePath, getRelativePath } from "../utils/pathUtils";
+import { isSyncingFileTree } from "./fileTracker";
 
 async function closeTabIfOpen(absolutePath: string): Promise<void> {
   const uri = vscode.Uri.file(absolutePath);
@@ -27,6 +28,9 @@ export function registerFileTreeHandlers(context: vscode.ExtensionContext): void
 
   const onFileOrDirCreate = vscode.workspace.onDidCreateFiles((event) => {
     if(!isConnected()) return;
+
+    // Handle may cause issue
+    if(isSyncingFileTree) return;
     for(const file of event.files) {
       const relativePath = getRelativePath(file);
       if(!relativePath || shouldIgnore(relativePath)) continue;
@@ -34,7 +38,7 @@ export function registerFileTreeHandlers(context: vscode.ExtensionContext): void
       send({
         type: isDir ? "DIR_CREATE" : "FILE_CREATE",
         path: relativePath
-      });    
+      });
       console.log(`[FileTree] ${isDir ? 'DIR' : 'FILE'}_CREATE sent: ${relativePath}`);
     }
   });
