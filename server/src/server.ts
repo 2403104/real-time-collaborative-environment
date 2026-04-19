@@ -18,7 +18,8 @@ app.get("/health", (req, res) => {
 })
 
 const server = http.createServer(app);
-const wss = new WebSocketServer({server});
+const wss = new WebSocketServer({server}); // for the read, write, edit only
+
 
 wss.on("connection", async (ws: WebSocket, req: http.IncomingMessage) => {
   try {
