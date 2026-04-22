@@ -19,14 +19,14 @@ import { handleStopModifying } from "./messages/handleStopModifying";
 
 import engine from "../engine";
 
-export async function onMessage(user: ConnectedUser, rawData: any) :  Promise<void> {
+export async function onLiveMessage(user: ConnectedUser, rawData: any) :  Promise<void> {
   let message;
   try {
     const dataStr = rawData instanceof Buffer ? rawData.toString() : rawData;
     const jsonStr = typeof dataStr === "string" ? dataStr: JSON.stringify(dataStr);
     message = JSON.parse(jsonStr);
   } catch (err: any) {
-    console.error(`[onMessage] Failed to parse JSON from user ${user.sessionKey}`);
+    console.error(`[onLiveMessage] Failed to parse JSON from user ${user.sessionKey}`);
     sendError(user.ws, "INVALID_JSON", "Message payload must be valid JSON");
     return;
   }
@@ -36,7 +36,6 @@ export async function onMessage(user: ConnectedUser, rawData: any) :  Promise<vo
   }
   try {
     const fileStates = engine.getAllFileStates(user.sessionKey);
-    console.log("[Sync Debug] Current File states from the server sent:", JSON.stringify(fileStates));
     switch(message.type){
       // File Operations
       case "FILE_CREATE":
@@ -76,17 +75,10 @@ export async function onMessage(user: ConnectedUser, rawData: any) :  Promise<vo
       case "FILE_EDIT": // (Handling both just in case frontend sends TEXT_EDIT)
         await handleFileEdit(user, message);
         break;
-        
-      // case "START_MODIFYING":
-      //   await handleStartModifying(user, message);
-      //   break;
-      // case "STOP_MODIFYING":
-      //   await handleStopModifying(user, message);
-      //   break;
 
       // Unknown Operations
       default:
-        console.warn(`[onMessage] Unknown message type received: ${message.type}`);
+        console.warn(`[onLiveMessage] Unknown message type received: ${message.type}`);
         sendError(
           user.ws,
           "UNKNOWN_TYPE",
@@ -96,7 +88,7 @@ export async function onMessage(user: ConnectedUser, rawData: any) :  Promise<vo
     }
     
   } catch (err: any) {
-    console.error(`[onMessage] Unhandled error processing ${message.type}:`, err);
+    console.error(`[onLiveMessage] Unhandled error processing ${message.type}:`, err);
     sendError(
       user.ws,
       "SERVER_ERROR",

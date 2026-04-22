@@ -29,6 +29,16 @@ export async function saveFileContent(nodeId: string, content: string): Promise<
   }
 }
 
+export async function loadFileHash(contentId : string) : Promise<string> {
+  try {
+    const doc = await FileContent.findOne({ _id: contentId }).select("hash").lean();
+    return doc?.hash ?? "";
+  } catch (err: any) {
+    console.error(`[DB] loadFileContent failed [${contentId}]:`, err.message);
+    return "";
+  }  
+}
+
 export async function loadFileContent(contentId: string): Promise<string> {
   try {
     const doc = await FileContent.findOne({ _id: contentId }).select("content").lean();

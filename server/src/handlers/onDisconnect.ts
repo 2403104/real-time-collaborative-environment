@@ -1,7 +1,7 @@
 import { WebSocket } from "ws";
 import { removeUser, isSessionEmpty, getUserCurrentFile } from "../session/sessionManager";
 import { removeActiveUser } from "../db/operation";
-import { broadcastSessionState } from "../broadcast";
+import { broadcastSessionState, broadcastTotalActiveUsers } from "../broadcast";
 import { getUserFromWs, joinUserNameAndMachineId, getUserCurrentFileBeforeRemoval } from "../session/sessionManager";
 import engine from "../engine/index"
 
@@ -30,6 +30,7 @@ export async function onDisconnect(ws: WebSocket) : Promise<void> {
     try {
       const fileStates = engine.getAllFileStates(sessionKey);
       broadcastSessionState(sessionKey, fileStates);
+      broadcastTotalActiveUsers(sessionKey);
       if(isSessionEmpty(sessionKey)) {
         try {
           engine.closeSession(sessionKey);

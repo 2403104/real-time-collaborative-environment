@@ -1,14 +1,18 @@
 // will route the messages (all the messages incoming from the server)
+import * as vscode from "vscode";
 
 import { writeSyncJsonFile } from "../extension";
 import { handleIncomingFileEdit } from "../handlers/editHandler";
 import { handleFileTree } from "../handlers/fileTracker";
 import { handleIncomingDirCreated, handleIncomingDirMoved, handleIncomingDirRename, handleIncomingFileCreated, handleIncomingFileDeleted, handleIncomingFileMoved, handleIncomingFileRenamed, hanldeIncomingDirDelete } from "../handlers/fileTreeHandler";
+import { startSync } from "../handlers/syncHandler";
 import { showError, showMessage } from "../ui/notifications";
 import { updateFilePresence, updateTotalUserCount } from "../ui/statusManager";
+import { buildLocalManifest } from "../utils/manifest";
 import { setSession } from "../utils/session";
 
-export function routeMessage(message : any): void {
+export async function routeMessage(message : any): Promise<void> {
+  console.log(`[MESSAGE TYPE] ${message.type}`)
   if(!message || !message.type) {
     console.warn("[Sync] Received message with no type:", message);
     return;
@@ -16,6 +20,7 @@ export function routeMessage(message : any): void {
   switch (message.type) {
 
     case "NEW_SESSION_CREATED":
+      console.log("[NEW_SESSION_CREATED] Message Recieved From Server");
       if(message.sessionKey) {
         setSession({ sessionKey: message.sessionKey });
         writeSyncJsonFile(message.sessionKey);
@@ -29,6 +34,13 @@ export function routeMessage(message : any): void {
         setSession({ sessionKey: message.sessionKey });
         writeSyncJsonFile(message.sessionKey);
         showMessage(`Sync: Joined session! Key: ${message.sessionKey}`);
+
+        // Handling Sync
+        const folders  = vscode.workspace.workspaceFolders;
+        if(!folders || folders.length === 0) break;
+        const dirPath = folders[0].uri.fsPath;
+        const localManifest = await buildLocalManifest(dirPath);
+        await startSync(localManifest);
         console.log(`[Sync] Joined Existing session: ${message.sessionKey}`);
       }
       break;
@@ -38,7 +50,7 @@ export function routeMessage(message : any): void {
       break;
 
     case "FILE_SYNC":
-      // TODO: import and call syncHandler
+      // Done
       break;
 
     case "SESSION_STATE":

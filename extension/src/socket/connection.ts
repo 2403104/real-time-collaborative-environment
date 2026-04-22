@@ -8,21 +8,25 @@ import { notifyConnecting, notifyReconnectFailed, notifyConnected, showMessage }
 let ws: WebSocket | null = null;
 
 let reconnectAttempts = 0;
-const MAX_RECONNECT_ATTEMPTS = 5;
+const MAX_RECONNECT_ATTEMPTS = 8;
 
 let reconnectTimer: NodeJS.Timeout | null = null;
+
+function getLiveUrl(query: string): string {
+  return `${config.server.url}/live${query}`;
+}
 
 export function createNewSession(workspaceName: string): void {
   const session = getSession();
   
   notifyConnecting("Creating new session...");
   
-  const url = 
-    `${config.server.url}` + 
+  const url = getLiveUrl(
     `?action=new_session` + 
     `&username=${encodeURIComponent(session.username)}` + 
     `&machineId=${encodeURIComponent(session.machineId)}` +
-    `&workspaceName=${encodeURIComponent(workspaceName)}`;
+    `&workspaceName=${encodeURIComponent(workspaceName)}`
+  );
     
   _createConnection(url, "new_session");
 }
@@ -32,12 +36,12 @@ export function joinExistingSession(sessionKey: string): void {
   
   notifyConnecting(`Joining session ${sessionKey}...`);
   
-  const url = 
-    `${config.server.url}` + 
+  const url = getLiveUrl(
     `?action=join_session` + 
     `&username=${encodeURIComponent(session.username)}` + 
     `&machineId=${encodeURIComponent(session.machineId)}` +
-    `&sessionKey=${encodeURIComponent(sessionKey)}`;
+    `&sessionKey=${encodeURIComponent(sessionKey)}`
+  );
     
   _createConnection(url, "join_session");
 }
@@ -59,11 +63,13 @@ function _createConnection(url: string, action: string): void {
     notifyConnected(action);
   });
   
-  ws.on("message", (data) => {
+  ws.on("message",async (data) => {
+    console.log(`[Extension Debug ] ${data}`)
     try {
       const message = JSON.parse(data.toString());
+      console.log(`[Debug ] : ${message}`);
       try {
-        routeMessage(message);
+        await routeMessage(message);
       } catch (err: any) {
         console.error("[Sync] Failed to handle message:", message?.type, err?.message ?? err);
       }

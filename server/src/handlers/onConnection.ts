@@ -35,7 +35,6 @@ export async function onConnection(ws: WebSocket, req: IncomingMessage) : Promis
 
     let workspace;
     let activeSessionKey; 
-    let isPureNewUser = false;
 
     if(action == "new_session") {
       const workspaceName = url.searchParams.get("workspaceName");
@@ -44,7 +43,7 @@ export async function onConnection(ws: WebSocket, req: IncomingMessage) : Promis
         ws.close();
         return;
       }
-
+      
       activeSessionKey = randomUUID();
       workspace = await Workspace.create({
         sessionKey: activeSessionKey,
@@ -58,10 +57,10 @@ export async function onConnection(ws: WebSocket, req: IncomingMessage) : Promis
         totalUsers: [userId]
       });
 
-      send(ws, {
+      ws.send(JSON.stringify({
         type: "NEW_SESSION_CREATED",
         sessionKey: activeSessionKey,
-      });
+      }));
       
     } else if(action == "join_session") {
       const sessionKey = url.searchParams.get("sessionKey");
@@ -87,10 +86,6 @@ export async function onConnection(ws: WebSocket, req: IncomingMessage) : Promis
         { $addToSet: { totalUsers: userId } },
         {new: false}      
       );
-
-      if(sessionBeforeUpdate && (!sessionBeforeUpdate.totalUsers.some(id => id.toString() === userId))) {
-        isPureNewUser = true;
-      }
 
       send(ws, {
         type: "JOINED_EXISTING_SESSION",
@@ -123,18 +118,6 @@ export async function onConnection(ws: WebSocket, req: IncomingMessage) : Promis
       broadcastTotalActiveUsers(activeSessionKey);
 
     } else if(action == "join_session") {
-
-      if(isPureNewUser) {
-        const fileTree = await getFileTree(workspaceId);
-        ws.send(JSON.stringify({
-          type: "FILE_TREE",
-          fileTree: fileTree
-        }));
-        // console.log(`[New User] : Username : ${username}`);
-        // console.log(`[Server] FileTree send from server:`, JSON.stringify(fileTree, null, 2));
-      } else {
-        // Will handle by checking the hash
-      }
 
       const fileStates = engine.getAllFileStates(activeSessionKey);
       console.log("[Sync] File states from the server sent:", JSON.stringify(fileStates));

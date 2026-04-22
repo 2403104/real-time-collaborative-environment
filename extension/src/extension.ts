@@ -86,6 +86,7 @@ function addToGitignore(): void {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
+  // Fix the bug , when the user reconnects the session
   initSession();
   authHandler(context);
   registerFileTreeHandlers(context);
