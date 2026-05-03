@@ -1,52 +1,5 @@
- 
-# Node.js & Dependencies
- 
-node_modules/
-npm-debug.log
-yarn-error.log
-yarn.log
-pnpm-debug.log
-
-# TypeScript & Build Output
- 
-dist/
-out/
-build/
-*.tsbuildinfo
-
- 
-# C++ / Node-Gyp (Native Addons)
- 
-# Ignore the generated build files from node-gyp
-build/Release/
-build/Debug/
-.node_gyp/
-*.node
-
- 
-# VS Code Extension Specific
- 
-.vscode-test/
-*.vsix
-
- 
-# Environment Variables & Secrets
- 
 .env
-.env.local
-.env.development
-.env.test
-.env.production
-
- 
-# OS & Editor Files
- 
-.DS_Store
-Thumbs.db
-.vscode/
-*.suo
-
-*.ntvs*
-*.njsproj
-*.sln
-*.swp
+node_modules/
+build/
+dist/
+cpp-engine/
