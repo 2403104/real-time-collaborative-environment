@@ -3,6 +3,7 @@
 
 namespace CppEngine {
   
+  // only one DocumentManager object will exist in the entire program, on the first call it will be created and on the next calls it be
   DocumentManager& DocumentManager::getInstance() {
     static DocumentManager instance;
     return instance;

@@ -1,5 +1,7 @@
 // will route the messages (all the messages incoming from the server)
 import * as vscode from "vscode";
+import * as path from "path";
+import * as fs from "fs";
 
 import { writeSyncJsonFile } from "../extension";
 import { handleIncomingFileEdit } from "../handlers/editHandler";
@@ -10,6 +12,19 @@ import { showError, showMessage } from "../ui/notifications";
 import { updateFilePresence, updateTotalUserCount } from "../ui/statusManager";
 import { buildLocalManifest } from "../utils/manifest";
 import { setSession } from "../utils/session";
+
+function updateSettingToUseLF() : void {
+  const folders  = vscode.workspace.workspaceFolders;
+  if(!folders || folders.length === 0) return;
+  const dirPath = folders[0].uri.fsPath;
+  const vscodeDir = path.join(dirPath, ".vscode");
+  if (!fs.existsSync(vscodeDir)) {
+    fs.mkdirSync(vscodeDir, { recursive: true });
+  }
+  const settingsPath = path.join(vscodeDir, "settings.json");
+  const settingsContent = { "files.eol": "\n" }; 
+  fs.writeFileSync(settingsPath, JSON.stringify(settingsContent, null, 2));
+}
 
 export async function routeMessage(message : any): Promise<void> {
   console.log(`[MESSAGE TYPE] ${message.type}`)
@@ -25,6 +40,7 @@ export async function routeMessage(message : any): Promise<void> {
         setSession({ sessionKey: message.sessionKey });
         writeSyncJsonFile(message.sessionKey);
         showMessage(`Sync: New session started! Key: ${message.sessionKey}`);
+        updateSettingToUseLF();
         console.log(`[Sync] Session created: ${message.sessionKey}`);
       }
       break;
@@ -39,6 +55,7 @@ export async function routeMessage(message : any): Promise<void> {
         const folders  = vscode.workspace.workspaceFolders;
         if(!folders || folders.length === 0) break;
         const dirPath = folders[0].uri.fsPath;
+        updateSettingToUseLF();
         const localManifest = await buildLocalManifest(dirPath);
         await startSync(localManifest);
         console.log(`[Sync] Joined Existing session: ${message.sessionKey}`);

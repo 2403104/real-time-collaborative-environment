@@ -146,7 +146,6 @@ namespace CppEngine {
 
     std::vector<Piece> PieceTable::getPieces() const {
       std::vector<Piece> result;
-      result.reserve(32);   
       inorder(_root, result);
       return result;
     }
@@ -183,7 +182,6 @@ namespace CppEngine {
       }
       y -> left = x;
       x -> parent = y;
-      // y -> leftLen = subtreeLen(y -> left, _nil);
       y -> leftLen = x -> leftLen + x -> piece.length + y -> leftLen;
     }
 

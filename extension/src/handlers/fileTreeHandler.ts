@@ -21,12 +21,13 @@ async function closeTabIfOpen(absolutePath: string): Promise<void> {
   }
 }
 
+
 // temporary memory to remmeber if the path was a direcctory or file before it get delted
 const pendingDeletions = new Map<string, boolean>();
 
 export function registerFileTreeHandlers(context: vscode.ExtensionContext): void {
 
-  const onFileOrDirCreate = vscode.workspace.onDidCreateFiles((event) => {
+  const onFileOrDirCreate = vscode.workspace.onDidCreateFiles(async (event) => {
     if(!isConnected()) return;
 
     // Handle may cause issue
@@ -105,6 +106,7 @@ export async function handleIncomingFileCreated(relativePath: string): Promise<v
   if(fs.existsSync(absolutePath)) return;
   try {
     fs.writeFileSync(absolutePath, "", "utf-8");
+    const uri = vscode.Uri.file(absolutePath);
     console.log(`[FileTree] File created locally: ${relativePath}`);
   } catch (err: any) {
     console.error(`[FileTree] Failed to create file: ${err.message}`);

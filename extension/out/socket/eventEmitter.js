@@ -36,6 +36,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.routeMessage = routeMessage;
 // will route the messages (all the messages incoming from the server)
 const vscode = __importStar(require("vscode"));
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
 const extension_1 = require("../extension");
 const editHandler_1 = require("../handlers/editHandler");
 const fileTracker_1 = require("../handlers/fileTracker");
@@ -45,6 +47,19 @@ const notifications_1 = require("../ui/notifications");
 const statusManager_1 = require("../ui/statusManager");
 const manifest_1 = require("../utils/manifest");
 const session_1 = require("../utils/session");
+function updateSettingToUseLF() {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders || folders.length === 0)
+        return;
+    const dirPath = folders[0].uri.fsPath;
+    const vscodeDir = path.join(dirPath, ".vscode");
+    if (!fs.existsSync(vscodeDir)) {
+        fs.mkdirSync(vscodeDir, { recursive: true });
+    }
+    const settingsPath = path.join(vscodeDir, "settings.json");
+    const settingsContent = { "files.eol": "\n" };
+    fs.writeFileSync(settingsPath, JSON.stringify(settingsContent, null, 2));
+}
 async function routeMessage(message) {
     console.log(`[MESSAGE TYPE] ${message.type}`);
     if (!message || !message.type) {
@@ -58,6 +73,7 @@ async function routeMessage(message) {
                 (0, session_1.setSession)({ sessionKey: message.sessionKey });
                 (0, extension_1.writeSyncJsonFile)(message.sessionKey);
                 (0, notifications_1.showMessage)(`Sync: New session started! Key: ${message.sessionKey}`);
+                updateSettingToUseLF();
                 console.log(`[Sync] Session created: ${message.sessionKey}`);
             }
             break;
@@ -71,6 +87,7 @@ async function routeMessage(message) {
                 if (!folders || folders.length === 0)
                     break;
                 const dirPath = folders[0].uri.fsPath;
+                updateSettingToUseLF();
                 const localManifest = await (0, manifest_1.buildLocalManifest)(dirPath);
                 await (0, syncHandler_1.startSync)(localManifest);
                 console.log(`[Sync] Joined Existing session: ${message.sessionKey}`);
