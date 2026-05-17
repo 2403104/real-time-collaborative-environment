@@ -37,6 +37,7 @@ build/Debug/
 .env.development
 .env.test
 .env.production
+.SETUP.md
 
  
 # OS & Editor Files
